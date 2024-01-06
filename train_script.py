@@ -63,13 +63,13 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
         for i, batch in enumerate(dataloader_train):
             batch = tuple(t.to(device) for t in batch)
             b_inputs, b_labels = batch
-            out_fr = torch.zeros((b_inputs.shape[0], 10))
+            out_fr = torch.zeros((b_inputs.shape[0], 10)).to(device)
 
 
             optimizer.zero_grad()
             for j in range(training_config['time_out']):
                 b_inputs_encoded = encoder(b_inputs)
-                out_fr += model(b_inputs)
+                out_fr += model(b_inputs_encoded)
             
             #  reset the model
             functional.reset_net(model)
@@ -99,12 +99,12 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
         for i, batch in enumerate(dataloader_test):
             batch = tuple(t.to(device) for t in batch)
             b_inputs, b_labels = batch
-            out_fr = torch.zeros((b_inputs.shape[0], 10))
+            out_fr = torch.zeros((b_inputs.shape[0], 10)).to(device)
 
             with torch.no_grad():
                 for j in range(training_config['time_out']):
                     b_inputs_encoded = encoder(b_inputs)
-                    out_fr += model(b_inputs)
+                    out_fr += model(b_inputs_encoded)
                 
                 #  reset the model
                 functional.reset_net(model)
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     parser.add_argument("--LSTM_hidden_size" , type=int    , help="hidden_size of the BiLSTM model"                  , default=256)
     parser.add_argument("--LSTM_num_layers"  , type  = int , help   = "num_layers of the BiLSTM model"               , default               = 1)
     parser.add_argument("--num_labels"       , type  = int , help   = "types of labels"                              , default               = 6)
-    parser.add_argument("--time_out"         , type  = int , help   = "maximum length of the time sequence"          , default               = 128)
+    parser.add_argument("--time_out"         , type  = int , help   = "maximum length of the time sequence"          , default               = 32)
     parser.add_argument("--model_path_dst"   , type  = str , help   = "the directory to save model"                  , default               = './saved_models/saved_dict.pth')
     parser.add_argument("--model_path_src"   , type = str  , help = "the directory to load model"                    , default = './saved_models/saved_dict.pth')
     parser.add_argument("--step_losses_pth"  , type=str    , help="the path of the json file that saves step losses" , default='./trails/step_losses.json')
